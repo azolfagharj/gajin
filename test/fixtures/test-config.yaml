@@ -1,0 +1,11 @@
+github:
+  token: test-token
+  owner: test-org
+  repos:
+    - test-repo1
+    - test-repo2
+
+secrets:
+  TEST_SECRET_1: "test-value-1"
+  TEST_SECRET_2: "test-value-2"
+

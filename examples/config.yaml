@@ -1,0 +1,26 @@
+github:
+  # GitHub token (can also be set via GH_TOKEN_WITH_ACTIONS_WRITE environment variable)
+  token: GH_TOKEN_WITH_ACTIONS_WRITE
+
+  # GitHub organization or username
+  owner: my-organization
+
+  # List of repositories to set secrets for
+  repos:
+    - repository-1
+    - repository-2
+    - repository-3
+
+secrets:
+  # Database connection string
+  DATABASE_URL: "postgresql://user:password@localhost:5432/mydb"
+
+  # API key for external service
+  API_KEY: "sk-1234567890abcdef"
+
+  # Webhook secret
+  WEBHOOK_SECRET: "whsec_1234567890"
+
+  # Another secret
+  ANOTHER_SECRET: "secret-value"
+
