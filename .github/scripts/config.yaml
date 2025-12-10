@@ -87,10 +87,15 @@ extract_variables:
 
 # Release assets - files to include in release
 files:
-  - name: config_example.yaml
+  - name: config.yaml
     path: examples/config.yaml
     append_version: false
     add_to_assets: true
+  - name: config.compact.yaml
+    path: examples/config.compact.yaml
+    append_version: false
+    add_to_assets: true
+
 
 # Zip configuration
 config:
