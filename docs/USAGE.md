@@ -99,7 +99,15 @@ GOOS=windows GOARCH=amd64 go build -o bin/easygh-windows-amd64.exe ./cmd/easygh
 
 ### Configuration File
 
-Create a YAML configuration file (default: `config.yaml`):
+You can either download the compact version from the latest release or create your own configuration file.
+
+**Download compact version** (recommended for quick start):
+```bash
+wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/config.compact.yaml
+mv config.compact.yaml config.yaml
+```
+
+**Or create a YAML configuration file** (default: `config.yaml`):
 
 ```yaml
 github:
@@ -137,6 +145,8 @@ environment_variables:
 ```
 
 **Note:** At least one of the four sections must be specified. Environments must exist in the repository before setting environment secrets or variables.
+
+**For complete example with detailed comments**, see [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
 
 ### Environment Variables
 
@@ -179,7 +189,9 @@ Your GitHub token needs specific permissions based on what you want to manage:
     - Environment secrets and variables
   - Note: Classic tokens provide broader permissions than needed
 
-For detailed setup instructions, see the comments in [examples/config.yaml](../../examples/config.yaml).
+For detailed setup instructions:
+- **Compact version**: Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
+- **Complete version**: See [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
 
 ## Basic Usage
 
@@ -339,7 +351,15 @@ GitHub API has rate limits. If you encounter rate limiting:
    # Windows: Download easygh-windows-amd64.exe and rename to easygh.exe
    ```
 
-2. **Create configuration file** (`config.yaml`):
+2. **Download or create configuration file**:
+
+   **Option A: Download compact version** (recommended for quick start):
+   ```bash
+   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/config.compact.yaml
+   mv config.compact.yaml config.yaml
+   ```
+
+   **Option B: Create your own** (`config.yaml`):
    ```yaml
    github:
      token: your-github-token-here  # Or use environment variable (see step 3)
@@ -353,6 +373,8 @@ GitHub API has rate limits. If you encounter rate limiting:
      DATABASE_URL: "postgresql://prod.db.example.com:5432/mydb"
      REDIS_URL: "redis://prod.redis.example.com:6379"
    ```
+
+   **For complete example with detailed comments**, see [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
 
 3. **Set GitHub token** (if not set in config file):
 

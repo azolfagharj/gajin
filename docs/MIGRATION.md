@@ -107,7 +107,9 @@ Make sure your GitHub token has the required permissions:
 **For Classic Tokens:**
 - **All operations**: `repo` scope
 
-See [examples/config.yaml](../../examples/config.yaml) for detailed permission setup instructions.
+For detailed permission setup instructions:
+- **Compact version**: Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
+- **Complete version**: See [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
 
 ### Step 4: Create Environments (If Using Environment Secrets/Variables)
 

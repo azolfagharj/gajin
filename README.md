@@ -79,34 +79,43 @@ Download the latest release binary for your system from the [Latest Release](htt
    # Rename it to easygh.exe
    ```
 
-2. Create a configuration file (`config.yaml`):
+2. Download or create a configuration file:
 
-```yaml
-github:
-  token: your-github-token-here  # Or use environment variable (see step 3)
-  owner: my-org
-  repos:
-    - repo1
-    - repo2
+   **Option A: Download compact version** (recommended for quick start):
+   ```bash
+   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/config.compact.yaml
+   mv config.compact.yaml config.yaml
+   ```
 
-repository_secrets:
-  MY_SECRET: "secret-value"
-  ANOTHER_SECRET: "another-value"
+   **Option B: Create your own** (`config.yaml`):
+   ```yaml
+   github:
+     token: your-github-token-here  # Or use environment variable (see step 3)
+     owner: my-org
+     repos:
+       - repo1
+       - repo2
 
-repository_variables:
-  LOG_LEVEL: "info"
-  DEFAULT_REGION: "us-east-1"
+   repository_secrets:
+     MY_SECRET: "secret-value"
+     ANOTHER_SECRET: "another-value"
 
-environment_secrets:
-  production:
-    PROD_API_KEY: "prod-key"
-  staging:
-    STAGING_API_KEY: "staging-key"
+   repository_variables:
+     LOG_LEVEL: "info"
+     DEFAULT_REGION: "us-east-1"
 
-environment_variables:
-  production:
-    DEPLOYMENT_REGION: "us-east-1"
-```
+   environment_secrets:
+     production:
+       PROD_API_KEY: "prod-key"
+     staging:
+       STAGING_API_KEY: "staging-key"
+
+   environment_variables:
+     production:
+       DEPLOYMENT_REGION: "us-east-1"
+   ```
+
+   **For complete example with detailed comments**, see [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
 
 3. Set your GitHub token:
 
@@ -201,7 +210,10 @@ easygh --version
 
 ## Configuration
 
-See [examples/config.yaml](examples/config.yaml) for a complete example.
+**Configuration Examples:**
+
+- **Compact version** (recommended for quick start): Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
+- **Complete version** (with detailed comments): See [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
 
 ### Configuration File Structure
 
@@ -254,7 +266,9 @@ environment_variables:
 - For public repositories only: `public_repo` scope
 - For organization-level operations: `admin:org` scope
 
-See [examples/config.yaml](examples/config.yaml) for detailed permission setup instructions.
+For detailed permission setup instructions:
+- **Compact version**: Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
+- **Complete version**: See [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
 
 ### CLI Flags
 
@@ -268,6 +282,11 @@ See [examples/config.yaml](examples/config.yaml) for detailed permission setup i
 - `--version`: Show version information
 
 ## Examples
+
+**Configuration Examples:**
+
+- **Compact version** (recommended for quick start): Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
+- **Complete version** (with detailed comments): See [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
 
 See the [examples/](examples/) directory for more examples.
 
