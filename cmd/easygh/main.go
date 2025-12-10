@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	AZ_VERSION string = "1.0.1"
+	AZ_VERSION string = "1.5.0"
 	AZ_UPDATE  string = "2025-12-10"
 )
 
@@ -90,7 +90,24 @@ func run(cmd *cobra.Command, args []string) error {
 }
 
 func execute(ctx context.Context, log *logger.Logger, ghClient github.Client, cfg *config.Config, flags *cli.Flags) error {
-	log.Info("Starting secrets management", "owner", cfg.GitHub.Owner, "repos", len(cfg.GitHub.Repos), "secrets", len(cfg.Secrets))
+	repoSecretsCount := len(cfg.RepositorySecrets)
+	envSecretsCount := 0
+	for _, secrets := range cfg.EnvironmentSecrets {
+		envSecretsCount += len(secrets)
+	}
+	repoVarsCount := len(cfg.RepositoryVariables)
+	envVarsCount := 0
+	for _, vars := range cfg.EnvironmentVariables {
+		envVarsCount += len(vars)
+	}
+
+	log.Info("Starting secrets and variables management",
+		"owner", cfg.GitHub.Owner,
+		"repos", len(cfg.GitHub.Repos),
+		"repository_secrets", repoSecretsCount,
+		"environment_secrets", envSecretsCount,
+		"repository_variables", repoVarsCount,
+		"environment_variables", envVarsCount)
 
 	if flags.DryRun {
 		log.Info("DRY RUN MODE - No changes will be made")
@@ -117,7 +134,7 @@ func execute(ctx context.Context, log *logger.Logger, ghClient github.Client, cf
 
 			log.Info("Processing repository", "repo", repoName)
 
-			repoErrors := processRepository(ctx, log, ghClient, cfg.GitHub.Owner, repoName, cfg.Secrets, flags.DryRun)
+			repoErrors := processRepository(ctx, log, ghClient, cfg.GitHub.Owner, repoName, cfg, flags.DryRun)
 
 			if len(repoErrors) > 0 {
 				errorMutex.Lock()
@@ -148,30 +165,104 @@ func execute(ctx context.Context, log *logger.Logger, ghClient github.Client, cf
 	return nil
 }
 
-func processRepository(ctx context.Context, log *logger.Logger, ghClient github.Client, owner, repo string, secrets map[string]string, dryRun bool) []error {
+func processRepository(ctx context.Context, log *logger.Logger, ghClient github.Client, owner, repo string, cfg *config.Config, dryRun bool) []error {
 	var errors []error
 
-	for secretName, secretValue := range secrets {
-		// Check if context is cancelled
+	// Repository ID will be fetched automatically by environment operations when needed
+
+	// Process Repository Secrets
+	for secretName, secretValue := range cfg.RepositorySecrets {
 		if ctx.Err() != nil {
 			return errors
 		}
 
 		if dryRun {
-			// Try to get existing secret to show diff
-			existingSecret, err := ghClient.GetSecret(ctx, owner, repo, secretName)
+			existingSecret, err := ghClient.GetRepositorySecret(ctx, owner, repo, secretName)
 			if err != nil {
-				log.Info("Would create secret", "repo", repo, "secret", secretName, "value", maskSecret(secretValue))
+				log.Info("Would create repository secret", "repo", repo, "secret", secretName, "value", maskSecret(secretValue))
 			} else {
-				log.Info("Would update secret", "repo", repo, "secret", secretName, "existing", existingSecret.Name, "new_value", maskSecret(secretValue))
+				log.Info("Would update repository secret", "repo", repo, "secret", secretName, "existing", existingSecret.Name, "new_value", maskSecret(secretValue))
 			}
 		} else {
-			if err := ghClient.SetSecret(ctx, owner, repo, secretName, secretValue); err != nil {
-				log.Error("Failed to set secret", "repo", repo, "secret", secretName, "error", err)
-				errors = append(errors, fmt.Errorf("repo %s/%s secret %s: %w", owner, repo, secretName, err))
+			if err := ghClient.SetRepositorySecret(ctx, owner, repo, secretName, secretValue); err != nil {
+				log.Error("Failed to set repository secret", "repo", repo, "secret", secretName, "error", err)
+				errors = append(errors, fmt.Errorf("repo %s/%s repository secret %s: %w", owner, repo, secretName, err))
 				continue
 			}
-			log.Info("Successfully set secret", "repo", repo, "secret", secretName)
+			log.Info("Successfully set repository secret", "repo", repo, "secret", secretName)
+		}
+	}
+
+	// Process Environment Secrets
+	for envName, secrets := range cfg.EnvironmentSecrets {
+		for secretName, secretValue := range secrets {
+			if ctx.Err() != nil {
+				return errors
+			}
+
+			if dryRun {
+				existingSecret, err := ghClient.GetEnvironmentSecret(ctx, owner, repo, envName, secretName)
+				if err != nil {
+					log.Info("Would create environment secret", "repo", repo, "environment", envName, "secret", secretName, "value", maskSecret(secretValue))
+				} else {
+					log.Info("Would update environment secret", "repo", repo, "environment", envName, "secret", secretName, "existing", existingSecret.Name, "new_value", maskSecret(secretValue))
+				}
+			} else {
+				if err := ghClient.SetEnvironmentSecret(ctx, owner, repo, envName, secretName, secretValue); err != nil {
+					log.Error("Failed to set environment secret", "repo", repo, "environment", envName, "secret", secretName, "error", err)
+					errors = append(errors, fmt.Errorf("repo %s/%s environment secret %s in environment %s: %w", owner, repo, secretName, envName, err))
+					continue
+				}
+				log.Info("Successfully set environment secret", "repo", repo, "environment", envName, "secret", secretName)
+			}
+		}
+	}
+
+	// Process Repository Variables
+	for varName, varValue := range cfg.RepositoryVariables {
+		if ctx.Err() != nil {
+			return errors
+		}
+
+		if dryRun {
+			existingVar, err := ghClient.GetRepositoryVariable(ctx, owner, repo, varName)
+			if err != nil {
+				log.Info("Would create repository variable", "repo", repo, "variable", varName, "value", varValue)
+			} else {
+				log.Info("Would update repository variable", "repo", repo, "variable", varName, "existing", existingVar.Name, "new_value", varValue)
+			}
+		} else {
+			if err := ghClient.SetRepositoryVariable(ctx, owner, repo, varName, varValue); err != nil {
+				log.Error("Failed to set repository variable", "repo", repo, "variable", varName, "error", err)
+				errors = append(errors, fmt.Errorf("repo %s/%s repository variable %s: %w", owner, repo, varName, err))
+				continue
+			}
+			log.Info("Successfully set repository variable", "repo", repo, "variable", varName)
+		}
+	}
+
+	// Process Environment Variables
+	for envName, variables := range cfg.EnvironmentVariables {
+		for varName, varValue := range variables {
+			if ctx.Err() != nil {
+				return errors
+			}
+
+			if dryRun {
+				existingVar, err := ghClient.GetEnvironmentVariable(ctx, owner, repo, envName, varName)
+				if err != nil {
+					log.Info("Would create environment variable", "repo", repo, "environment", envName, "variable", varName, "value", varValue)
+				} else {
+					log.Info("Would update environment variable", "repo", repo, "environment", envName, "variable", varName, "existing", existingVar.Name, "new_value", varValue)
+				}
+			} else {
+				if err := ghClient.SetEnvironmentVariable(ctx, owner, repo, envName, varName, varValue); err != nil {
+					log.Error("Failed to set environment variable", "repo", repo, "environment", envName, "variable", varName, "error", err)
+					errors = append(errors, fmt.Errorf("repo %s/%s environment variable %s in environment %s: %w", owner, repo, varName, envName, err))
+					continue
+				}
+				log.Info("Successfully set environment variable", "repo", repo, "environment", envName, "variable", varName)
+			}
 		}
 	}
 

@@ -1,26 +1,420 @@
+# =============================================================================
+# easygh Configuration File
+# =============================================================================
+# This file defines the configuration for managing GitHub Actions secrets
+# across multiple repositories. All secrets will be encrypted automatically
+# using GitHub's public key encryption before being sent to the API.
+#
+# For detailed documentation, see: https://github.com/azolfagharj/easy_gh_secret
+# =============================================================================
+
 github:
-  # GitHub token (can also be set via GH_TOKEN_WITH_ACTIONS_WRITE environment variable)
+  # ---------------------------------------------------------------------------
+  # GitHub Personal Access Token (PAT)
+  # ---------------------------------------------------------------------------
+  # REQUIRED: A GitHub Personal Access Token with appropriate permissions.
+  #
+  # ⭐ RECOMMENDED: Fine-grained Personal Access Tokens (More Secure)
+  # =================================================================
+  # Fine-grained tokens provide better security with granular permissions
+  # and are the recommended approach for managing repository secrets.
+  #
+  # How to create a Fine-grained token:
+  #   1. Go to GitHub Settings > Developer settings > Personal access tokens
+  #   2. Click "Fine-grained tokens" > "Generate new token"
+  #   3. Token settings:
+  #      - Token name: "easygh-secrets-management" (or descriptive name)
+  #      - Expiration: Set appropriate expiration (recommended: 90 days)
+  #      - Description: "Manage GitHub Actions secrets via easygh tool"
+  #   4. Repository access:
+  #      - Select "Only select repositories"
+  #      - Choose the repositories you want to manage secrets for
+  #      - OR select "All repositories" if managing multiple repos
+  #   5. Repository permissions:
+  #      REQUIRED PERMISSIONS (based on what you want to manage):
+  #
+  #      For Repository Secrets:
+  #      - Under "Repository permissions" > "Actions":
+  #        ✅ Set "Secrets" to "Read and write"
+  #        This permission allows:
+  #        - Reading repository public keys (for encryption)
+  #        - Creating/updating repository secrets
+  #        - Reading secret metadata
+  #
+  #      For Repository Variables:
+  #      - Under "Repository permissions" > "Actions":
+  #        ✅ Set "Variables" to "Read and write"
+  #        This permission allows:
+  #        - Creating/updating repository variables
+  #        - Reading repository variables
+  #
+  #      For Environment Secrets:
+  #      - Under "Repository permissions":
+  #        ✅ Set "Environments" to "Read and write"
+  #        IMPORTANT: Environment secrets require Environments permission (not under Actions)
+  #        This permission allows:
+  #        - Reading environment public keys (for encryption)
+  #        - Creating/updating environment secrets
+  #        - Reading environment secret metadata
+  #
+  #      For Environment Variables:
+  #      - Under "Repository permissions":
+  #        ✅ Set "Environments" to "Read and write"
+  #        IMPORTANT: Environment variables require Environments permission (not under Actions)
+  #        This permission allows:
+  #        - Creating/updating environment variables
+  #        - Reading environment variables
+  #
+  #      Additional Required Permission:
+  #      - Under "Repository permissions" > "Metadata":
+  #        ✅ Set "Metadata" to "Read-only" (required for API access)
+  #
+  #      Note: If you need to manage multiple types, you need ALL corresponding permissions.
+  #      For example, to manage all types, you need:
+  #      - Actions > Secrets: Read and write (for repository secrets)
+  #      - Actions > Variables: Read and write (for repository variables)
+  #      - Environments: Read and write (for environment secrets and environment variables)
+  #      - Metadata: Read-only
+  #
+  #   6. Account permissions: Leave as default (no account permissions needed)
+  #   7. Click "Generate token" and copy it immediately
+  #      Format: github_pat_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  #
+  # Fine-grained Token Advantages:
+  #   ✅ Granular permissions (only what you need)
+  #   ✅ Repository-level access control (can limit to specific repos)
+  #   ✅ Better security (principle of least privilege)
+  #   ✅ Easier to audit and manage
+  #   ✅ Can be scoped to specific organizations
+  #
+  # Required Fine-grained Permissions Summary:
+  #   - Repository Secrets: Actions > Secrets: Read and write
+  #   - Repository Variables: Actions > Variables: Read and write
+  #   - Environment Secrets: Environments: Read and write (NOT under Actions)
+  #   - Environment Variables: Environments: Read and write (NOT under Actions)
+  #   - Metadata: Read-only (required for all operations)
+  #
+  # =================================================================
+  # Alternative: Classic Personal Access Tokens (Legacy)
+  # =================================================================
+  # Classic tokens work but provide broader permissions than needed.
+  # Only use if fine-grained tokens are not available for your use case.
+  #
+  # How to create a Classic token:
+  #   1. Go to GitHub Settings > Developer settings > Personal access tokens
+  #   2. Click "Tokens (classic)" > "Generate new token" > "Generate new token (classic)"
+  #   3. Token settings:
+  #      - Note: "easygh-secrets-management"
+  #      - Expiration: 90 days (or custom)
+  #   4. Select scopes:
+  #      - ✅ repo (Full control of private repositories)
+  #        This scope includes access to:
+  #        - Repository secrets (read/write)
+  #        - Repository variables (read/write)
+  #        - Environment secrets (read/write)
+  #        - Environment variables (read/write)
+  #        Note: The 'repo' scope provides all Actions-related permissions including
+  #        secrets and variables management. It's a broad scope that grants full
+  #        repository access, which is why fine-grained tokens are recommended.
+  #      - ✅ public_repo (if managing public repositories)
+  #        Required only if you need to manage secrets/variables in public repos
+  #        Note: 'repo' scope already includes public_repo, so only select this if
+  #        you want to limit access to public repos only
+  #      - ✅ admin:org (only if managing organization-level secrets/variables)
+  #        Required only for organization-level operations
+  #   5. Click "Generate token" and copy it immediately
+  #      Format: ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  #
+  # Classic Token Required Scopes:
+  #   - repo: Required for all repository and environment secrets/variables
+  #     This single scope covers:
+  #     - Repository Secrets: ✅ Full access
+  #     - Repository Variables: ✅ Full access
+  #     - Environment Secrets: ✅ Full access
+  #     - Environment Variables: ✅ Full access
+  #
+  # Classic Token Limitations:
+  #   ⚠️  Broader permissions than needed (full repo access)
+  #   ⚠️  Cannot limit to specific repositories
+  #   ⚠️  Less granular control
+  #   ⚠️  Cannot separate permissions for secrets vs variables
+  #
+  # =================================================================
+  # Security Best Practices
+  # =================================================================
+  #   - ⚠️  NEVER commit tokens to version control
+  #   - ✅ Use environment variable GH_TOKEN_WITH_ACTIONS_WRITE instead (recommended)
+  #   - ✅ Prefer fine-grained tokens over classic tokens
+  #   - ✅ Set token expiration and rotate regularly
+  #   - ✅ Use different tokens for different environments (dev/staging/prod)
+  #   - ✅ Limit repository access to only what's needed
+  #   - ✅ Use descriptive token names for easy identification
+  #   - ✅ Review and revoke unused tokens regularly
+  #
+  # =================================================================
+  # Setting Token via Environment Variable (Recommended)
+  # =================================================================
+  # For better security, set the token via environment variable instead of
+  # storing it in the config file:
+  #
+  #   export GH_TOKEN_WITH_ACTIONS_WRITE="github_pat_your_fine_grained_token"
+  #   # OR for classic tokens:
+  #   export GH_TOKEN_WITH_ACTIONS_WRITE="ghp_your_classic_token"
+  #
+  # If both config file and environment variable are set, environment variable
+  # takes precedence.
+  #
+  # =================================================================
+  # Example Token Values
+  # =================================================================
+  #   token: "github_pat_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # Fine-grained (recommended)
+  #   token: "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # Classic token
+  #   token: GH_TOKEN_WITH_ACTIONS_WRITE                 # Reference to env var
+  # ---------------------------------------------------------------------------
   token: GH_TOKEN_WITH_ACTIONS_WRITE
 
-  # GitHub organization or username
+  # ---------------------------------------------------------------------------
+  # Repository Owner (Organization or Username)
+  # ---------------------------------------------------------------------------
+  # REQUIRED: The GitHub username or organization name that owns the repositories.
+  #
+  # How to determine the owner:
+  #   - For personal repositories: Use your GitHub username
+  #     Example: If your repo URL is github.com/johndoe/my-repo, owner is "johndoe"
+  #   - For organization repositories: Use the organization name
+  #     Example: If your repo URL is github.com/acme-corp/my-repo, owner is "acme-corp"
+  #
+  # Rules:
+  #   - Must match exactly (case-sensitive)
+  #   - Cannot be empty
+  #   - Must be a valid GitHub username/organization name
+  #   - The token must have access to this owner's repositories
+  #
+  # For organization repositories:
+  #   - Token must belong to a user with admin access to the organization
+  #   - Or use an organization-level token
+  #   - Organization must allow third-party access if required
+  #
+  # Examples:
+  #   owner: "johndoe"           # Personal account
+  #   owner: "acme-corp"        # Organization
+  #   owner: "my-org"           # Organization with hyphen
+  # ---------------------------------------------------------------------------
   owner: my-organization
 
-  # List of repositories to set secrets for
+  # ---------------------------------------------------------------------------
+  # Repository List
+  # ---------------------------------------------------------------------------
+  # REQUIRED: List of repository names (without owner) to manage secrets for.
+  #
+  # Format:
+  #   - Repository names only (not full URLs)
+  #   - Case-sensitive (must match GitHub repository name exactly)
+  #   - Can include both public and private repositories
+  #   - At least one repository must be specified
+  #
+  # Requirements:
+  #   - Token must have admin or write access to each repository
+  #   - Repository must exist and be accessible
+  #   - Repository must have GitHub Actions enabled (for secrets to be usable)
+  #
+  # Processing:
+  #   - Repositories are processed concurrently for better performance
+  #   - All secrets defined below will be set for each repository
+  #   - Use --continue-on-error flag to continue even if one repository fails
+  #
+  # Examples:
+  #   repos:
+  #     - "my-app"                    # Simple repository name
+  #     - "backend-service"           # Repository with hyphen
+  #     - "frontend.web"               # Repository with dot
+  #     - "api_v2"                     # Repository with underscore
+  #
+  # Note: Repository names should NOT include:
+  #   - Owner prefix (e.g., "owner/repo" ❌)
+  #   - .git extension (e.g., "repo.git" ❌)
+  #   - Full URL (e.g., "https://github.com/owner/repo" ❌)
+  # ---------------------------------------------------------------------------
   repos:
     - repository-1
     - repository-2
     - repository-3
 
-secrets:
-  # Database connection string
+# =============================================================================
+# Repository Secrets Configuration
+# =============================================================================
+# Define repository-level secrets that will be set for each repository listed above.
+# Repository secrets are available to all workflows in the repository.
+# Secrets are encrypted automatically using GitHub's public key encryption
+# before being sent to the API. Once set, secret values cannot be retrieved
+# (GitHub only allows reading secret metadata, not values).
+#
+# Secret Naming Rules:
+#   - Must be uppercase letters, numbers, and underscores only
+#   - Must start with a letter
+#   - Cannot contain spaces or special characters (except underscore)
+#   - Recommended: Use SCREAMING_SNAKE_CASE (e.g., DATABASE_URL, API_KEY)
+#   - Maximum length: 100 characters
+#
+# Secret Value Rules:
+#   - Can contain any characters (will be encrypted)
+#   - No length limit (but GitHub recommends keeping under 64KB)
+#   - Empty values are not allowed
+#   - Values are case-sensitive
+# =============================================================================
+repository_secrets:
+  # ---------------------------------------------------------------------------
+  # Database Connection String
+  # ---------------------------------------------------------------------------
+  # Example: PostgreSQL connection string
+  # Format: postgresql://[user[:password]@][host][:port][/database][?params]
+  # Used by: Application to connect to database
+  # ---------------------------------------------------------------------------
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb"
 
-  # API key for external service
+  # ---------------------------------------------------------------------------
+  # External API Key
+  # ---------------------------------------------------------------------------
+  # Example: API key for external service (e.g., Stripe, SendGrid, etc.)
+  # Format: Usually starts with service prefix (e.g., "sk_", "sg_", etc.)
+  # Used by: Application to authenticate with external APIs
+  # Security: Keep this secret secure, rotate regularly
+  # ---------------------------------------------------------------------------
   API_KEY: "sk-1234567890abcdef"
 
-  # Webhook secret
+  # ---------------------------------------------------------------------------
+  # Webhook Secret
+  # ---------------------------------------------------------------------------
+  # Example: Secret for validating webhook payloads from external services
+  # Format: Usually a random string or base64-encoded value
+  # Used by: Application to verify webhook signatures
+  # Common providers: Stripe (whsec_*), GitHub (random string), etc.
+  # ---------------------------------------------------------------------------
   WEBHOOK_SECRET: "whsec_1234567890"
 
-  # Another secret
+  # ---------------------------------------------------------------------------
+  # Generic Secret Example
+  # ---------------------------------------------------------------------------
+  # Example: Any other secret value your application needs
+  # Can be used for: Encryption keys, OAuth secrets, service tokens, etc.
+  # ---------------------------------------------------------------------------
   ANOTHER_SECRET: "secret-value"
 
+  # ---------------------------------------------------------------------------
+  # Additional Examples (commented out - uncomment and modify as needed)
+  # ---------------------------------------------------------------------------
+  # AWS_ACCESS_KEY_ID: "AKIAIOSFODNN7EXAMPLE"
+  # AWS_SECRET_ACCESS_KEY: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  # REDIS_URL: "redis://localhost:6379/0"
+  # JWT_SECRET: "your-super-secret-jwt-key-here"
+  # SMTP_PASSWORD: "your-email-service-password"
+  # SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+  # DOCKER_REGISTRY_TOKEN: "your-docker-registry-token"
+  # ---------------------------------------------------------------------------
+
+# =============================================================================
+# Environment Secrets Configuration
+# =============================================================================
+# Define environment-level secrets that will be set for specific environments
+# in each repository. Environment secrets are only available to workflows
+# that reference the specific environment.
+#
+# IMPORTANT: Environments must exist in the repository before setting secrets.
+# Create environments in: Repository Settings > Environments
+#
+# Structure:
+#   environment_secrets:
+#     <environment_name>:
+#       <SECRET_NAME>: "<secret-value>"
+#
+# Example:
+#   environment_secrets:
+#     production:
+#       PROD_DB_PASSWORD: "secure-password"
+#     staging:
+#       STAGING_API_KEY: "staging-key"
+# =============================================================================
+environment_secrets:
+  # ---------------------------------------------------------------------------
+  # Production Environment Secrets
+  # ---------------------------------------------------------------------------
+  # production:
+  #   PROD_DATABASE_URL: "postgresql://prod.db.example.com:5432/mydb"
+  #   PROD_API_KEY: "prod-api-key-here"
+
+  # ---------------------------------------------------------------------------
+  # Staging Environment Secrets
+  # ---------------------------------------------------------------------------
+  # staging:
+  #   STAGING_DATABASE_URL: "postgresql://staging.db.example.com:5432/mydb"
+  #   STAGING_API_KEY: "staging-api-key-here"
+
+# =============================================================================
+# Repository Variables Configuration
+# =============================================================================
+# Define repository-level variables that will be set for each repository.
+# Repository variables are available to all workflows in the repository.
+# Unlike secrets, variables are stored as plaintext and can be read back.
+#
+# Variables are useful for non-sensitive configuration values that need to be
+# shared across workflows or changed without modifying workflow files.
+#
+# Variable Naming Rules:
+#   - Must be uppercase letters, numbers, and underscores only
+#   - Must start with a letter
+#   - Cannot contain spaces or special characters (except underscore)
+#   - Recommended: Use SCREAMING_SNAKE_CASE (e.g., DEFAULT_REGION, LOG_LEVEL)
+#   - Maximum length: 100 characters
+#
+# Variable Value Rules:
+#   - Can contain any characters
+#   - No length limit (but GitHub recommends keeping under 64KB)
+#   - Empty values are not allowed
+#   - Values are case-sensitive
+# =============================================================================
+repository_variables:
+  # ---------------------------------------------------------------------------
+  # Example Repository Variables
+  # ---------------------------------------------------------------------------
+  # DEFAULT_REGION: "us-east-1"
+  # LOG_LEVEL: "info"
+  # MAX_RETRIES: "3"
+  # TIMEOUT_SECONDS: "30"
+
+# =============================================================================
+# Environment Variables Configuration
+# =============================================================================
+# Define environment-level variables that will be set for specific environments
+# in each repository. Environment variables are only available to workflows
+# that reference the specific environment.
+#
+# IMPORTANT: Environments must exist in the repository before setting variables.
+# Create environments in: Repository Settings > Environments
+#
+# Structure:
+#   environment_variables:
+#     <environment_name>:
+#       <VARIABLE_NAME>: "<variable-value>"
+#
+# Example:
+#   environment_variables:
+#     production:
+#       DEPLOYMENT_REGION: "us-east-1"
+#       ENABLE_FEATURE_FLAG: "true"
+# =============================================================================
+environment_variables:
+  # ---------------------------------------------------------------------------
+  # Production Environment Variables
+  # ---------------------------------------------------------------------------
+  # production:
+  #   DEPLOYMENT_REGION: "us-east-1"
+  #   ENABLE_MONITORING: "true"
+  #   MAX_INSTANCES: "10"
+
+  # ---------------------------------------------------------------------------
+  # Staging Environment Variables
+  # ---------------------------------------------------------------------------
+  # staging:
+  #   DEPLOYMENT_REGION: "us-west-2"
+  #   ENABLE_MONITORING: "false"
+  #   MAX_INSTANCES: "3"

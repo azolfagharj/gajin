@@ -1,0 +1,30 @@
+# GitHub Token Permissions Required:
+# Fine-grained Token:
+#   - Repository Secrets: Actions > Secrets: Read and write
+#   - Repository Variables: Actions > Variables: Read and write
+#   - Environment Secrets: Environments: Read and write (NOT under Actions)
+#   - Environment Variables: Environments: Read and write (NOT under Actions)
+#   - Metadata: Read-only
+# Classic Token:
+#   - repo scope (provides all permissions)
+
+github:
+  token: GH_TOKEN_WITH_ACTIONS_WRITE
+  owner: my-organization
+  repos:
+    - my-repository
+
+repository_secrets:
+  DATABASE_URL: "postgresql://user:password@localhost:5432/mydb"
+
+environment_secrets:
+  production:
+    PROD_API_KEY: "prod-api-key-here"
+
+repository_variables:
+  LOG_LEVEL: "info"
+
+environment_variables:
+  staging:
+    DEPLOYMENT_REGION: "us-west-2"
+

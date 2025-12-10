@@ -10,20 +10,90 @@
 
 ## Installation
 
-### Prerequisites
+### Binary Release (Recommended)
 
-- Go 1.22 or later
-- GitHub token with `repo` and `actions:write` permissions
+Download the latest release binary for your system from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
+
+**Available binaries:**
+- `easygh-darwin-amd64` - macOS (Intel)
+- `easygh-darwin-arm64` - macOS (Apple Silicon)
+- `easygh-linux-amd64` - Linux (64-bit)
+- `easygh-linux-arm64` - Linux (ARM64)
+- `easygh-windows-amd64.exe` - Windows (64-bit)
+
+**Quick setup:**
+
+1. Download the binary for your system:
+   ```bash
+   # Linux (amd64)
+   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-linux-amd64
+   chmod +x easygh-linux-amd64
+   mv easygh-linux-amd64 easygh
+
+   # Linux (ARM64)
+   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-linux-arm64
+   chmod +x easygh-linux-arm64
+   mv easygh-linux-arm64 easygh
+
+   # macOS (Apple Silicon)
+   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-darwin-arm64
+   chmod +x easygh-darwin-arm64
+   mv easygh-darwin-arm64 easygh
+
+   # macOS (Intel)
+   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-darwin-amd64
+   chmod +x easygh-darwin-amd64
+   mv easygh-darwin-amd64 easygh
+
+   # Windows (amd64)
+   # Download: https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-windows-amd64.exe
+   # Rename it to easygh.exe
+   ```
+
+2. Verify installation:
+   ```bash
+   ./easygh --version
+   ```
 
 ### Build from Source
 
+If you prefer to build from source or need a custom build:
+
+**Prerequisites:**
+- Go 1.22 or later
+- GitHub token with appropriate permissions (see [GitHub Token Permissions](#github-token-permissions))
+
+**Build steps:**
+
 ```bash
-git clone https://github.com/yourusername/easy_gh_secret.git
+git clone https://github.com/azolfagharj/easy_gh_secret.git
 cd easy_gh_secret
 make build
 ```
 
 The binary will be created in `bin/easygh`.
+
+**Alternative build command:**
+
+```bash
+go build -o bin/easygh ./cmd/easygh
+```
+
+**Cross-platform builds:**
+
+```bash
+# Build for Linux (amd64)
+GOOS=linux GOARCH=amd64 go build -o bin/easygh-linux-amd64 ./cmd/easygh
+
+# Build for macOS (Apple Silicon)
+GOOS=darwin GOARCH=arm64 go build -o bin/easygh-darwin-arm64 ./cmd/easygh
+
+# Build for macOS (Intel)
+GOOS=darwin GOARCH=amd64 go build -o bin/easygh-darwin-amd64 ./cmd/easygh
+
+# Build for Windows
+GOOS=windows GOARCH=amd64 go build -o bin/easygh-windows-amd64.exe ./cmd/easygh
+```
 
 ## Configuration
 
@@ -40,11 +110,33 @@ github:
     - repository-2
     - repository-3
 
-secrets:
+# Repository-level secrets (encrypted, available to all workflows)
+repository_secrets:
   DATABASE_URL: "postgresql://localhost:5432/mydb"
   API_KEY: "sk-1234567890abcdef"
   WEBHOOK_SECRET: "whsec_1234567890"
+
+# Environment-level secrets (encrypted, available only to workflows using the environment)
+environment_secrets:
+  production:
+    PROD_DATABASE_URL: "postgresql://prod.db.example.com:5432/mydb"
+  staging:
+    STAGING_DATABASE_URL: "postgresql://staging.db.example.com:5432/mydb"
+
+# Repository-level variables (plaintext, available to all workflows)
+repository_variables:
+  LOG_LEVEL: "info"
+  DEFAULT_REGION: "us-east-1"
+
+# Environment-level variables (plaintext, available only to workflows using the environment)
+environment_variables:
+  production:
+    DEPLOYMENT_REGION: "us-east-1"
+  staging:
+    DEPLOYMENT_REGION: "us-west-2"
 ```
+
+**Note:** At least one of the four sections must be specified. Environments must exist in the repository before setting environment secrets or variables.
 
 ### Environment Variables
 
@@ -58,19 +150,48 @@ If both are set, the environment variable takes precedence.
 
 ### GitHub Token Permissions
 
-Your GitHub token needs the following permissions:
-- `repo` (Full control of private repositories)
-- `actions:write` (Write access to GitHub Actions)
+**Fine-grained Personal Access Tokens (Recommended):**
+
+Your GitHub token needs specific permissions based on what you want to manage:
+
+- **Repository Secrets**:
+  - Repository permissions > Actions > **Secrets**: Read and write
+
+- **Repository Variables**:
+  - Repository permissions > Actions > **Variables**: Read and write
+
+- **Environment Secrets**:
+  - Repository permissions > **Environments**: Read and write
+  - IMPORTANT: Environment secrets require Environments permission (NOT under Actions)
+
+- **Environment Variables**:
+  - Repository permissions > **Environments**: Read and write
+  - IMPORTANT: Environment variables require Environments permission (NOT under Actions)
+
+- **Required for all operations**:
+  - Repository permissions > **Metadata**: Read-only (required for API access)
+
+**Classic Personal Access Tokens:**
+
+- **All operations**: `repo` scope
+  - This single scope provides full access to:
+    - Repository secrets and variables
+    - Environment secrets and variables
+  - Note: Classic tokens provide broader permissions than needed
+
+For detailed setup instructions, see the comments in [examples/config.yaml](../../examples/config.yaml).
 
 ## Basic Usage
 
-### Set Secrets
+### Set Secrets and Variables
 
 ```bash
 easygh --config config.yaml
 ```
 
-This will set all secrets defined in the configuration file to all specified repositories.
+This will set all secrets and variables defined in the configuration file to all specified repositories. The tool processes:
+- Repository secrets and variables (set for all repositories)
+- Environment secrets and variables (set for each environment in each repository)
 
 ### Dry Run
 
@@ -191,38 +312,108 @@ GitHub API has rate limits. If you encounter rate limiting:
 
 ## Examples
 
-### Example 1: Set Secrets to Multiple Repositories
+### Example 1: Quick Start with Binary Release
 
-```yaml
-# config.yaml
-github:
-  owner: my-org
-  repos:
-    - frontend
-    - backend
-    - api
+1. **Download the binary** for your system from [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest):
+   ```bash
+   # Linux (amd64)
+   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-linux-amd64
+   chmod +x easygh-linux-amd64
+   mv easygh-linux-amd64 easygh
 
-secrets:
-  DATABASE_URL: "postgresql://prod.db.example.com:5432/mydb"
-  REDIS_URL: "redis://prod.redis.example.com:6379"
-```
+   # Linux (ARM64)
+   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-linux-arm64
+   chmod +x easygh-linux-arm64
+   mv easygh-linux-arm64 easygh
 
-```bash
-export GH_TOKEN_WITH_ACTIONS_WRITE=ghp_xxxxxxxxxxxx
-easygh --config config.yaml
-```
+   # macOS (Apple Silicon)
+   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-darwin-arm64
+   chmod +x easygh-darwin-arm64
+   mv easygh-darwin-arm64 easygh
 
-### Example 2: Dry Run Before Applying
+   # macOS (Intel)
+   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-darwin-amd64
+   chmod +x easygh-darwin-amd64
+   mv easygh-darwin-amd64 easygh
+
+   # Windows: Download easygh-windows-amd64.exe and rename to easygh.exe
+   ```
+
+2. **Create configuration file** (`config.yaml`):
+   ```yaml
+   github:
+     token: your-github-token-here  # Or use environment variable (see step 3)
+     owner: my-org
+     repos:
+       - frontend
+       - backend
+       - api
+
+   repository_secrets:
+     DATABASE_URL: "postgresql://prod.db.example.com:5432/mydb"
+     REDIS_URL: "redis://prod.redis.example.com:6379"
+   ```
+
+3. **Set GitHub token** (if not set in config file):
+
+   **Option A: Already set in config.yaml** (as shown above)
+
+   **Option B: Use environment variable** (more secure, recommended):
+   ```bash
+   export GH_TOKEN_WITH_ACTIONS_WRITE=ghp_xxxxxxxxxxxx
+   ```
+   If using environment variable, you can remove the `token:` line from config.yaml or leave it as `token: GH_TOKEN_WITH_ACTIONS_WRITE`. The environment variable will take precedence.
+
+4. **Run the tool**:
+   ```bash
+   # Linux/macOS
+   ./easygh --config config.yaml
+
+   # Windows
+   easygh.exe --config config.yaml
+   ```
+
+### Example 4: Dry Run Before Applying
 
 ```bash
 easygh --config config.yaml --dry-run
 ```
 
-### Example 3: Override Repositories
+This will show what would be set without making actual changes. Output includes:
+- Repository secrets and variables
+- Environment secrets and variables (with environment name)
+
+### Example 5: Override Repositories
 
 ```bash
 easygh --config config.yaml --repo frontend,backend
 ```
 
-This will only set secrets to `frontend` and `backend` repositories, ignoring the repos in the config file.
+This will only set secrets and variables to `frontend` and `backend` repositories, ignoring the repos in the config file.
+
+## Differences Between Secrets and Variables
+
+### Secrets
+- **Encrypted**: Values are encrypted using GitHub's public key encryption before being sent to the API
+- **Masked**: Values are masked in logs and workflow outputs (only first 2 and last 2 characters shown)
+- **Not readable**: Once set, secret values cannot be retrieved via API (only metadata)
+- **Use for**: Passwords, API keys, tokens, database credentials, and other sensitive data
+
+### Variables
+- **Plaintext**: Values are stored as plaintext (no encryption)
+- **Visible**: Values can be read back via API and shown in logs
+- **Use for**: Non-sensitive configuration values like regions, log levels, feature flags, deployment settings
+
+## Environment Requirements
+
+Before setting environment secrets or variables, you must create the environments in GitHub:
+
+1. Go to your repository on GitHub
+2. Navigate to **Settings** > **Environments**
+3. Click **"New environment"**
+4. Enter the environment name (e.g., "production", "staging")
+5. Configure protection rules if needed
+6. Click **"Configure environment"**
+
+If you try to set environment secrets or variables for a non-existent environment, you'll get an error message indicating that the environment must be created first.
 

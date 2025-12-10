@@ -16,16 +16,62 @@ func TestConfig_Validate(t *testing.T) {
 		errMsg  string
 	}{
 		{
-			name: "valid config",
+			name: "valid config with repository secrets",
 			config: &Config{
 				GitHub: GitHubConfig{
 					Token: "test-token",
 					Owner: "test-org",
 					Repos: []string{"repo1", "repo2"},
 				},
-				Secrets: map[string]string{
+				RepositorySecrets: map[string]string{
 					"SECRET1": "value1",
 					"SECRET2": "value2",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid config with environment secrets",
+			config: &Config{
+				GitHub: GitHubConfig{
+					Token: "test-token",
+					Owner: "test-org",
+					Repos: []string{"repo1"},
+				},
+				EnvironmentSecrets: map[string]map[string]string{
+					"production": {
+						"SECRET1": "value1",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid config with repository variables",
+			config: &Config{
+				GitHub: GitHubConfig{
+					Token: "test-token",
+					Owner: "test-org",
+					Repos: []string{"repo1"},
+				},
+				RepositoryVariables: map[string]string{
+					"VAR1": "value1",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid config with environment variables",
+			config: &Config{
+				GitHub: GitHubConfig{
+					Token: "test-token",
+					Owner: "test-org",
+					Repos: []string{"repo1"},
+				},
+				EnvironmentVariables: map[string]map[string]string{
+					"production": {
+						"VAR1": "value1",
+					},
 				},
 			},
 			wantErr: false,
@@ -38,7 +84,7 @@ func TestConfig_Validate(t *testing.T) {
 					Owner: "",
 					Repos: []string{"repo1"},
 				},
-				Secrets: map[string]string{"SECRET1": "value1"},
+				RepositorySecrets: map[string]string{"SECRET1": "value1"},
 			},
 			wantErr: true,
 			errMsg:  "github.owner is required",
@@ -51,7 +97,7 @@ func TestConfig_Validate(t *testing.T) {
 					Owner: "test-org",
 					Repos: []string{},
 				},
-				Secrets: map[string]string{"SECRET1": "value1"},
+				RepositorySecrets: map[string]string{"SECRET1": "value1"},
 			},
 			wantErr: true,
 			errMsg:  "at least one repository must be specified",
@@ -64,23 +110,22 @@ func TestConfig_Validate(t *testing.T) {
 					Owner: "test-org",
 					Repos: []string{"repo1"},
 				},
-				Secrets: map[string]string{"SECRET1": "value1"},
+				RepositorySecrets: map[string]string{"SECRET1": "value1"},
 			},
 			wantErr: true,
 			errMsg:  "github.token is required",
 		},
 		{
-			name: "missing secrets",
+			name: "missing all sections",
 			config: &Config{
 				GitHub: GitHubConfig{
 					Token: "test-token",
 					Owner: "test-org",
 					Repos: []string{"repo1"},
 				},
-				Secrets: map[string]string{},
 			},
 			wantErr: true,
-			errMsg:  "at least one secret must be specified",
+			errMsg:  "at least one of repository_secrets, environment_secrets, repository_variables, or environment_variables must be specified",
 		},
 		{
 			name: "empty repo name",
@@ -90,36 +135,100 @@ func TestConfig_Validate(t *testing.T) {
 					Owner: "test-org",
 					Repos: []string{""},
 				},
-				Secrets: map[string]string{"SECRET1": "value1"},
+				RepositorySecrets: map[string]string{"SECRET1": "value1"},
 			},
 			wantErr: true,
 			errMsg:  "repository name cannot be empty",
 		},
 		{
-			name: "empty secret key",
+			name: "empty repository secret key",
 			config: &Config{
 				GitHub: GitHubConfig{
 					Token: "test-token",
 					Owner: "test-org",
 					Repos: []string{"repo1"},
 				},
-				Secrets: map[string]string{"": "value1"},
+				RepositorySecrets: map[string]string{"": "value1"},
 			},
 			wantErr: true,
-			errMsg:  "secret key cannot be empty",
+			errMsg:  "repository secret key cannot be empty",
 		},
 		{
-			name: "empty secret value",
+			name: "empty repository secret value",
 			config: &Config{
 				GitHub: GitHubConfig{
 					Token: "test-token",
 					Owner: "test-org",
 					Repos: []string{"repo1"},
 				},
-				Secrets: map[string]string{"SECRET1": ""},
+				RepositorySecrets: map[string]string{"SECRET1": ""},
 			},
 			wantErr: true,
-			errMsg:  "secret value for 'SECRET1' cannot be empty",
+			errMsg:  "repository secret value for 'SECRET1' cannot be empty",
+		},
+		{
+			name: "empty environment name",
+			config: &Config{
+				GitHub: GitHubConfig{
+					Token: "test-token",
+					Owner: "test-org",
+					Repos: []string{"repo1"},
+				},
+				EnvironmentSecrets: map[string]map[string]string{
+					"": {
+						"SECRET1": "value1",
+					},
+				},
+			},
+			wantErr: true,
+			errMsg:  "environment name cannot be empty",
+		},
+		{
+			name: "empty environment secret key",
+			config: &Config{
+				GitHub: GitHubConfig{
+					Token: "test-token",
+					Owner: "test-org",
+					Repos: []string{"repo1"},
+				},
+				EnvironmentSecrets: map[string]map[string]string{
+					"production": {
+						"": "value1",
+					},
+				},
+			},
+			wantErr: true,
+			errMsg:  "environment secret key cannot be empty for environment 'production'",
+		},
+		{
+			name: "empty repository variable value",
+			config: &Config{
+				GitHub: GitHubConfig{
+					Token: "test-token",
+					Owner: "test-org",
+					Repos: []string{"repo1"},
+				},
+				RepositoryVariables: map[string]string{"VAR1": ""},
+			},
+			wantErr: true,
+			errMsg:  "repository variable value for 'VAR1' cannot be empty",
+		},
+		{
+			name: "empty environment variable value",
+			config: &Config{
+				GitHub: GitHubConfig{
+					Token: "test-token",
+					Owner: "test-org",
+					Repos: []string{"repo1"},
+				},
+				EnvironmentVariables: map[string]map[string]string{
+					"production": {
+						"VAR1": "",
+					},
+				},
+			},
+			wantErr: true,
+			errMsg:  "environment variable value for 'VAR1' in environment 'production' cannot be empty",
 		},
 	}
 
@@ -143,7 +252,7 @@ func TestConfig_ApplyOverrides(t *testing.T) {
 			Owner: "original-owner",
 			Repos: []string{"repo1", "repo2"},
 		},
-		Secrets: map[string]string{"SECRET1": "value1"},
+		RepositorySecrets: map[string]string{"SECRET1": "value1"},
 	}
 
 	cfg.ApplyOverrides("new-token", "new-owner", []string{"repo3"})
@@ -167,7 +276,7 @@ github:
     - repo1
     - repo2
 
-secrets:
+repository_secrets:
   SECRET1: "value1"
   SECRET2: "value2"
 `
@@ -182,8 +291,8 @@ secrets:
 	assert.Equal(t, "test-token", cfg.GitHub.Token)
 	assert.Equal(t, "test-org", cfg.GitHub.Owner)
 	assert.Equal(t, []string{"repo1", "repo2"}, cfg.GitHub.Repos)
-	assert.Equal(t, "value1", cfg.Secrets["SECRET1"])
-	assert.Equal(t, "value2", cfg.Secrets["SECRET2"])
+	assert.Equal(t, "value1", cfg.RepositorySecrets["SECRET1"])
+	assert.Equal(t, "value2", cfg.RepositorySecrets["SECRET2"])
 }
 
 func TestLoadConfig_WithEnvToken(t *testing.T) {
@@ -201,7 +310,7 @@ github:
   repos:
     - repo1
 
-secrets:
+repository_secrets:
   SECRET1: "value1"
 `
 

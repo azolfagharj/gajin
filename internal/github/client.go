@@ -9,14 +9,29 @@ import (
 
 // Client is the interface for GitHub API operations.
 type Client interface {
-	// GetPublicKey retrieves the public key for a repository.
+	// Repository Secrets
 	GetPublicKey(ctx context.Context, owner, repo string) (*PublicKey, error)
+	SetRepositorySecret(ctx context.Context, owner, repo, name, secretValue string) error
+	GetRepositorySecret(ctx context.Context, owner, repo, name string) (*SecretMetadata, error)
 
-	// SetSecret sets a secret for a repository.
-	// The secretValue should be plaintext; it will be encrypted automatically.
+	// Environment Secrets
+	GetEnvironmentPublicKey(ctx context.Context, owner, repo, environment string) (*PublicKey, error)
+	SetEnvironmentSecret(ctx context.Context, owner, repo, environment, name, secretValue string) error
+	GetEnvironmentSecret(ctx context.Context, owner, repo, environment, name string) (*SecretMetadata, error)
+
+	// Repository Variables
+	SetRepositoryVariable(ctx context.Context, owner, repo, name, value string) error
+	GetRepositoryVariable(ctx context.Context, owner, repo, name string) (*VariableMetadata, error)
+
+	// Environment Variables
+	SetEnvironmentVariable(ctx context.Context, owner, repo, environment, name, value string) error
+	GetEnvironmentVariable(ctx context.Context, owner, repo, environment, name string) (*VariableMetadata, error)
+
+	// Helper methods
+	GetRepositoryID(ctx context.Context, owner, repo string) (int64, error)
+
+	// Legacy methods (for backward compatibility during migration)
 	SetSecret(ctx context.Context, owner, repo, name, secretValue string) error
-
-	// GetSecret retrieves metadata about a secret (not the value, which is not accessible).
 	GetSecret(ctx context.Context, owner, repo, name string) (*SecretMetadata, error)
 }
 
@@ -29,6 +44,14 @@ type PublicKey struct {
 // SecretMetadata represents metadata about a secret.
 type SecretMetadata struct {
 	Name      string
+	CreatedAt string
+	UpdatedAt string
+}
+
+// VariableMetadata represents metadata about a variable.
+type VariableMetadata struct {
+	Name      string
+	Value     string
 	CreatedAt string
 	UpdatedAt string
 }
@@ -64,11 +87,30 @@ func (c *githubClient) GetPublicKey(ctx context.Context, owner, repo string) (*P
 	}, nil
 }
 
-// GetSecret retrieves metadata about a secret.
+// GetRepositoryID retrieves the repository ID.
+func (c *githubClient) GetRepositoryID(ctx context.Context, owner, repo string) (int64, error) {
+	repository, _, err := c.client.Repositories.Get(ctx, owner, repo)
+	if err != nil {
+		return 0, handleGitHubError(err, owner, repo, "", "", "")
+	}
+	return repository.GetID(), nil
+}
+
+// SetRepositorySecret sets a secret for a repository (alias for SetSecret for backward compatibility).
+func (c *githubClient) SetRepositorySecret(ctx context.Context, owner, repo, name, secretValue string) error {
+	return c.SetSecret(ctx, owner, repo, name, secretValue)
+}
+
+// GetRepositorySecret retrieves metadata about a repository secret (alias for GetSecret for backward compatibility).
+func (c *githubClient) GetRepositorySecret(ctx context.Context, owner, repo, name string) (*SecretMetadata, error) {
+	return c.GetSecret(ctx, owner, repo, name)
+}
+
+// GetSecret retrieves metadata about a secret (legacy method).
 func (c *githubClient) GetSecret(ctx context.Context, owner, repo, name string) (*SecretMetadata, error) {
 	secret, _, err := c.client.Actions.GetRepoSecret(ctx, owner, repo, name)
 	if err != nil {
-		return nil, err
+		return nil, handleGitHubError(err, owner, repo, "", "repository_secret", name)
 	}
 
 	return &SecretMetadata{

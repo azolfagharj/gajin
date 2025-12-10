@@ -4,8 +4,11 @@ import "fmt"
 
 // Config represents the application configuration.
 type Config struct {
-	GitHub  GitHubConfig       `yaml:"github"`
-	Secrets map[string]string  `yaml:"secrets"`
+	GitHub               GitHubConfig                      `yaml:"github"`
+	RepositorySecrets    map[string]string                 `yaml:"repository_secrets"`
+	EnvironmentSecrets   map[string]map[string]string      `yaml:"environment_secrets"`
+	RepositoryVariables  map[string]string                 `yaml:"repository_variables"`
+	EnvironmentVariables map[string]map[string]string      `yaml:"environment_variables"`
 }
 
 // GitHubConfig contains GitHub-specific configuration.
@@ -29,8 +32,14 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("github.token is required (can be set via GH_TOKEN_WITH_ACTIONS_WRITE environment variable)")
 	}
 
-	if len(c.Secrets) == 0 {
-		return fmt.Errorf("at least one secret must be specified")
+	// Check if at least one section is specified
+	hasRepositorySecrets := len(c.RepositorySecrets) > 0
+	hasEnvironmentSecrets := len(c.EnvironmentSecrets) > 0
+	hasRepositoryVariables := len(c.RepositoryVariables) > 0
+	hasEnvironmentVariables := len(c.EnvironmentVariables) > 0
+
+	if !hasRepositorySecrets && !hasEnvironmentSecrets && !hasRepositoryVariables && !hasEnvironmentVariables {
+		return fmt.Errorf("at least one of repository_secrets, environment_secrets, repository_variables, or environment_variables must be specified")
 	}
 
 	for _, repo := range c.GitHub.Repos {
@@ -39,12 +48,53 @@ func (c *Config) Validate() error {
 		}
 	}
 
-	for key, value := range c.Secrets {
+	// Validate repository secrets
+	for key, value := range c.RepositorySecrets {
 		if key == "" {
-			return fmt.Errorf("secret key cannot be empty")
+			return fmt.Errorf("repository secret key cannot be empty")
 		}
 		if value == "" {
-			return fmt.Errorf("secret value for '%s' cannot be empty", key)
+			return fmt.Errorf("repository secret value for '%s' cannot be empty", key)
+		}
+	}
+
+	// Validate environment secrets
+	for envName, secrets := range c.EnvironmentSecrets {
+		if envName == "" {
+			return fmt.Errorf("environment name cannot be empty")
+		}
+		for key, value := range secrets {
+			if key == "" {
+				return fmt.Errorf("environment secret key cannot be empty for environment '%s'", envName)
+			}
+			if value == "" {
+				return fmt.Errorf("environment secret value for '%s' in environment '%s' cannot be empty", key, envName)
+			}
+		}
+	}
+
+	// Validate repository variables
+	for key, value := range c.RepositoryVariables {
+		if key == "" {
+			return fmt.Errorf("repository variable key cannot be empty")
+		}
+		if value == "" {
+			return fmt.Errorf("repository variable value for '%s' cannot be empty", key)
+		}
+	}
+
+	// Validate environment variables
+	for envName, variables := range c.EnvironmentVariables {
+		if envName == "" {
+			return fmt.Errorf("environment name cannot be empty")
+		}
+		for key, value := range variables {
+			if key == "" {
+				return fmt.Errorf("environment variable key cannot be empty for environment '%s'", envName)
+			}
+			if value == "" {
+				return fmt.Errorf("environment variable value for '%s' in environment '%s' cannot be empty", key, envName)
+			}
 		}
 	}
 

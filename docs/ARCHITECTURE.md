@@ -4,6 +4,46 @@
 
 easygh is built using a layered architecture with clear separation of concerns. The application follows Go best practices and design principles.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture Diagram](#architecture-diagram)
+- [Package Structure](#package-structure)
+  - [cmd/easygh/](#cmdeasygh)
+  - [internal/config/](#internalconfig)
+  - [internal/github/](#internalgithub)
+  - [internal/logger/](#internallogger)
+  - [internal/cli/](#internalcli)
+- [Design Principles](#design-principles)
+  - [Single Responsibility Principle](#single-responsibility-principle)
+  - [Dependency Injection](#dependency-injection)
+  - [Interface-Based Design](#interface-based-design)
+  - [Error Handling](#error-handling)
+  - [Concurrency](#concurrency)
+- [Data Flow](#data-flow)
+- [Security Considerations](#security-considerations)
+  - [Secret Encryption](#secret-encryption)
+  - [Token Handling](#token-handling)
+  - [Secret Masking](#secret-masking)
+- [Extension Points](#extension-points)
+  - [Adding New Secret Sources](#adding-new-secret-sources)
+  - [Adding New Output Formats](#adding-new-output-formats)
+  - [Adding New GitHub Operations](#adding-new-github-operations)
+- [Testing Strategy](#testing-strategy)
+  - [Unit Tests](#unit-tests)
+  - [Integration Tests](#integration-tests)
+- [Build and Deployment](#build-and-deployment)
+  - [Binary Releases](#binary-releases)
+  - [Building from Source](#building-from-source)
+  - [Makefile](#makefile)
+  - [Cross-platform Builds](#cross-platform-builds)
+- [Supported Operations](#supported-operations)
+  - [Repository Secrets](#repository-secrets)
+  - [Environment Secrets](#environment-secrets)
+  - [Repository Variables](#repository-variables)
+  - [Environment Variables](#environment-variables)
+- [Future Improvements](#future-improvements)
+
 ## Architecture Diagram
 
 ```
@@ -51,7 +91,8 @@ Configuration management:
 
 GitHub API client:
 - `client.go`: GitHub client interface and implementation
-- `secrets.go`: Secret encryption and API operations
+- `secrets.go`: Secret encryption and API operations for repository and environment secrets
+- `errors.go`: Custom error types for better error handling
 
 ### internal/logger/
 
@@ -108,10 +149,12 @@ Repositories are processed concurrently using goroutines:
 3. **Validation**: Configuration is validated
 4. **Client Creation**: GitHub client is created with the token
 5. **Concurrent Processing**: For each repository:
-   - Get public key
-   - Encrypt secrets
-   - Set secrets via API
-6. **Error Collection**: Errors are collected and reported
+   - Get repository ID (for environment operations)
+   - Process repository secrets (get public key, encrypt, set)
+   - Process environment secrets (get environment public key, encrypt, set)
+   - Process repository variables (set directly, no encryption)
+   - Process environment variables (set directly, no encryption)
+6. **Error Collection**: Errors are collected and reported with context
 7. **Result Reporting**: Final status is reported to the user
 
 ## Security Considerations
@@ -142,7 +185,7 @@ This format ensures that each encryption produces different ciphertext even for 
 
 ### Secret Masking
 
-In dry-run mode, secret values are masked in logs (only first 2 and last 2 characters shown).
+In dry-run mode and logs, secret values are masked (only first 2 and last 2 characters shown). Variable values are shown in full since they are not sensitive.
 
 ## Extension Points
 
@@ -185,20 +228,75 @@ To add support for other GitHub operations:
 
 ## Build and Deployment
 
+### Binary Releases
+
+Pre-built binaries are available for all supported platforms in each [release](https://github.com/azolfagharj/easy_gh_secret/releases):
+- `easygh-darwin-amd64` - macOS (Intel)
+- `easygh-darwin-arm64` - macOS (Apple Silicon)
+- `easygh-linux-amd64` - Linux (64-bit)
+- `easygh-linux-arm64` - Linux (ARM64)
+- `easygh-windows-amd64.exe` - Windows (64-bit)
+
+**Recommended:** Use the binary release for the fastest setup. Download from [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest).
+
+### Building from Source
+
 ### Makefile
 
 The Makefile provides common build targets:
-- `make build`: Build the binary
+- `make build`: Build the binary for current platform
 - `make test`: Run tests
 - `make lint`: Run linters
 - `make clean`: Clean build artifacts
+
+### Cross-platform Builds
+
+To build for different platforms:
+
+```bash
+# Linux (amd64)
+GOOS=linux GOARCH=amd64 go build -o bin/easygh-linux-amd64 ./cmd/easygh
+
+# macOS (Apple Silicon)
+GOOS=darwin GOARCH=arm64 go build -o bin/easygh-darwin-arm64 ./cmd/easygh
+
+# macOS (Intel)
+GOOS=darwin GOARCH=amd64 go build -o bin/easygh-darwin-amd64 ./cmd/easygh
+
+# Linux (ARM64)
+GOOS=linux GOARCH=arm64 go build -o bin/easygh-linux-arm64 ./cmd/easygh
+
+# Windows
+GOOS=windows GOARCH=amd64 go build -o bin/easygh-windows-amd64.exe ./cmd/easygh
+```
+
+## Supported Operations
+
+### Repository Secrets
+- Create/update repository secrets with automatic encryption
+- Read secret metadata (values cannot be retrieved)
+
+### Environment Secrets
+- Create/update environment secrets with automatic encryption
+- Read secret metadata (values cannot be retrieved)
+- Requires environment to exist in repository
+
+### Repository Variables
+- Create/update repository variables (plaintext)
+- Read variable values (including the actual value)
+
+### Environment Variables
+- Create/update environment variables (plaintext)
+- Read variable values (including the actual value)
+- Requires environment to exist in repository
 
 ## Future Improvements
 
 - Rate limiting for GitHub API calls
 - Retry logic with exponential backoff
 - Progress bar for better UX
-- Support for secret deletion
+- Support for secret/variable deletion
 - Support for secret rotation
 - Support for multiple GitHub instances (GitHub Enterprise)
+- Bulk operations for better performance
 
