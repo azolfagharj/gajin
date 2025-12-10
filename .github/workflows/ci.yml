@@ -68,7 +68,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [test, lint]
     strategy:
       matrix:
         include:
@@ -165,14 +164,13 @@ jobs:
       - name: Upload binaries artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-binaries
+          name: release-binaries-${{ matrix.goos }}-${{ matrix.goarch }}
           path: release-binaries/*
           retention-days: 1
-          merge-multiple: true
 
   create-release:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [test, lint, build]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -183,8 +181,9 @@ jobs:
       - name: Download binaries artifact
         uses: actions/download-artifact@v4
         with:
-          name: release-binaries
+          pattern: release-binaries-*
           path: release-binaries
+          merge-multiple: true
 
       - name: Run release script
         id: prepare_release
