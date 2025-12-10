@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	AZ_VERSION string = "1.5.4"
+	AZ_VERSION string = "1.5.5"
 	AZ_UPDATE  string = "2025-12-10"
 )
 
