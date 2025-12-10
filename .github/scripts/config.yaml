@@ -62,7 +62,7 @@ release_notes_file: release_notes.md
 extract_variables:
   VERSION:
     name: VERSION
-    file_path: cmd/easygh/main.go
+    file_path: cmd/gajin/main.go
     extraction:
       type: grep_awk
       grep_pattern: "AZ_VERSION"
@@ -74,7 +74,7 @@ extract_variables:
     add_to_env: true
   UPDATE:
     name: UPDATE
-    file_path: cmd/easygh/main.go
+    file_path: cmd/gajin/main.go
     extraction:
       type: grep_awk
       grep_pattern: "AZ_UPDATE"
@@ -87,7 +87,7 @@ extract_variables:
 
 # Release assets - files to include in release
 files:
-  - name: config.yaml
+  - name: config.full.yaml
     path: examples/config.yaml
     append_version: false
     add_to_assets: true
@@ -109,7 +109,7 @@ default_excludes:
     - "version"
 
 zips:
-  - name: easygh
+  - name: gajin
     includes:
       - "*"
     excludes:

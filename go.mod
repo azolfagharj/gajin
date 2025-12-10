@@ -1,4 +1,4 @@
-module github.com/yourusername/easy_gh_secret
+module github.com/azolfagharj/gajin
 
 go 1.22
 

@@ -108,8 +108,8 @@ Make sure your GitHub token has the required permissions:
 - **All operations**: `repo` scope
 
 For detailed permission setup instructions:
-- **Compact version**: Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
-- **Complete version**: See [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
+- **Compact version**: Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/gajin/releases/latest) page.
+- **Complete version**: See [examples/config.yaml](https://github.com/azolfagharj/gajin/blob/main/examples/config.yaml) in the repository.
 
 ### Step 4: Create Environments (If Using Environment Secrets/Variables)
 
@@ -129,7 +129,7 @@ Repeat for each environment you want to use.
 Run the tool with `--dry-run` to verify your configuration:
 
 ```bash
-easygh --config config.yaml --dry-run
+gajin --config config.yaml --dry-run
 ```
 
 This will show what would be set without making actual changes.
@@ -214,7 +214,7 @@ environment_variables:
 
 ### Old config still works
 
-If you're using an old version of easygh, update to the latest version first, then migrate your configuration.
+If you're using an old version of gajin, update to the latest version first, then migrate your configuration.
 
 ## Need Help?
 

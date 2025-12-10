@@ -2,14 +2,14 @@
 
 ## Overview
 
-easygh is built using a layered architecture with clear separation of concerns. The application follows Go best practices and design principles.
+gajin is built using a layered architecture with clear separation of concerns. The application follows Go best practices and design principles.
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Architecture Diagram](#architecture-diagram)
 - [Package Structure](#package-structure)
-  - [cmd/easygh/](#cmdeasygh)
+  - [cmd/gajin/](#cmdgajin)
   - [internal/config/](#internalconfig)
   - [internal/github/](#internalgithub)
   - [internal/logger/](#internallogger)
@@ -77,7 +77,7 @@ easygh is built using a layered architecture with clear separation of concerns. 
 
 ## Package Structure
 
-### cmd/easygh/
+### cmd/gajin/
 
 Entry point of the application. Contains the main function and CLI command setup.
 
@@ -230,14 +230,14 @@ To add support for other GitHub operations:
 
 ### Binary Releases
 
-Pre-built binaries are available for all supported platforms in each [release](https://github.com/azolfagharj/easy_gh_secret/releases):
-- `easygh-darwin-amd64` - macOS (Intel)
-- `easygh-darwin-arm64` - macOS (Apple Silicon)
-- `easygh-linux-amd64` - Linux (64-bit)
-- `easygh-linux-arm64` - Linux (ARM64)
-- `easygh-windows-amd64.exe` - Windows (64-bit)
+Pre-built binaries are available for all supported platforms in each [release](https://github.com/azolfagharj/gajin/releases):
+- `gajin-darwin-amd64` - macOS (Intel)
+- `gajin-darwin-arm64` - macOS (Apple Silicon)
+- `gajin-linux-amd64` - Linux (64-bit)
+- `gajin-linux-arm64` - Linux (ARM64)
+- `gajin-windows-amd64.exe` - Windows (64-bit)
 
-**Recommended:** Use the binary release for the fastest setup. Download from [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest).
+**Recommended:** Use the binary release for the fastest setup. Download from [Latest Release](https://github.com/azolfagharj/gajin/releases/latest).
 
 ### Building from Source
 
@@ -255,19 +255,19 @@ To build for different platforms:
 
 ```bash
 # Linux (amd64)
-GOOS=linux GOARCH=amd64 go build -o bin/easygh-linux-amd64 ./cmd/easygh
+GOOS=linux GOARCH=amd64 go build -o bin/gajin-linux-amd64 ./cmd/gajin
 
 # macOS (Apple Silicon)
-GOOS=darwin GOARCH=arm64 go build -o bin/easygh-darwin-arm64 ./cmd/easygh
+GOOS=darwin GOARCH=arm64 go build -o bin/gajin-darwin-arm64 ./cmd/gajin
 
 # macOS (Intel)
-GOOS=darwin GOARCH=amd64 go build -o bin/easygh-darwin-amd64 ./cmd/easygh
+GOOS=darwin GOARCH=amd64 go build -o bin/gajin-darwin-amd64 ./cmd/gajin
 
 # Linux (ARM64)
-GOOS=linux GOARCH=arm64 go build -o bin/easygh-linux-arm64 ./cmd/easygh
+GOOS=linux GOARCH=arm64 go build -o bin/gajin-linux-arm64 ./cmd/gajin
 
 # Windows
-GOOS=windows GOARCH=amd64 go build -o bin/easygh-windows-amd64.exe ./cmd/easygh
+GOOS=windows GOARCH=amd64 go build -o bin/gajin-windows-amd64.exe ./cmd/gajin
 ```
 
 ## Supported Operations

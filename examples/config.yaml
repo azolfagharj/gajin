@@ -1,11 +1,12 @@
 # =============================================================================
-# easygh Configuration File
+# GajIn Configuration File
+# GitHub Actions Secrets & Variables Injector
 # =============================================================================
 # This file defines the configuration for managing GitHub Actions secrets
 # across multiple repositories. All secrets will be encrypted automatically
 # using GitHub's public key encryption before being sent to the API.
 #
-# For detailed documentation, see: https://github.com/azolfagharj/easy_gh_secret
+# For detailed documentation, see: https://github.com/azolfagharj/gajin
 # =============================================================================
 
 github:
@@ -23,9 +24,9 @@ github:
   #   1. Go to GitHub Settings > Developer settings > Personal access tokens
   #   2. Click "Fine-grained tokens" > "Generate new token"
   #   3. Token settings:
-  #      - Token name: "easygh-secrets-management" (or descriptive name)
+  #      - Token name: "gajin-secrets-management" (or descriptive name)
   #      - Expiration: Set appropriate expiration (recommended: 90 days)
-  #      - Description: "Manage GitHub Actions secrets via easygh tool"
+  #      - Description: "Manage GitHub Actions secrets via gajin tool"
   #   4. Repository access:
   #      - Select "Only select repositories"
   #      - Choose the repositories you want to manage secrets for
@@ -104,7 +105,7 @@ github:
   #   1. Go to GitHub Settings > Developer settings > Personal access tokens
   #   2. Click "Tokens (classic)" > "Generate new token" > "Generate new token (classic)"
   #   3. Token settings:
-  #      - Note: "easygh-secrets-management"
+  #      - Note: "gajin-secrets-management"
   #      - Expiration: 90 days (or custom)
   #   4. Select scopes:
   #      - ✅ repo (Full control of private repositories)

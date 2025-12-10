@@ -8,22 +8,22 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/yourusername/easy_gh_secret/internal/cli"
-	"github.com/yourusername/easy_gh_secret/internal/config"
-	"github.com/yourusername/easy_gh_secret/internal/github"
-	"github.com/yourusername/easy_gh_secret/internal/logger"
+	"github.com/azolfagharj/gajin/internal/cli"
+	"github.com/azolfagharj/gajin/internal/config"
+	"github.com/azolfagharj/gajin/internal/github"
+	"github.com/azolfagharj/gajin/internal/logger"
 )
 
 var (
-	AZ_VERSION string = "1.5.2"
+	AZ_VERSION string = "1.5.3"
 	AZ_UPDATE  string = "2025-12-10"
 )
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:          "easygh",
-		Short:        "Manage GitHub Actions secrets across multiple repositories",
-		Long:         `easygh is a CLI tool to manage GitHub Actions secrets across multiple repositories using a YAML configuration file.`,
+		Use:          "gajin",
+		Short:        "GitHub Actions Secrets & Variables Injector",
+		Long:         `GajIn (GitHub Actions Secrets & Variables Injector) is a CLI tool to manage GitHub Actions secrets and variables across multiple repositories using a YAML configuration file.`,
 		RunE:         run,
 		SilenceUsage: true,
 	}

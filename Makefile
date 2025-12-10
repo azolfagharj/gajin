@@ -1,9 +1,9 @@
 .PHONY: build test lint clean release help verify
 
 # Variables
-BINARY_NAME=easygh
+BINARY_NAME=gajin
 BINARY_PATH=bin/$(BINARY_NAME)
-MAIN_PATH=./cmd/easygh
+MAIN_PATH=./cmd/gajin
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'

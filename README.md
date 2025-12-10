@@ -1,4 +1,6 @@
-# easygh
+# GajIn
+
+**GitHub Actions Secrets & Variables Injector**
 
 A CLI tool to manage GitHub Actions secrets and variables across multiple repositories using a YAML configuration file.
 
@@ -41,49 +43,49 @@ A CLI tool to manage GitHub Actions secrets and variables across multiple reposi
 
 ### Binary Release (Recommended)
 
-Download the latest release binary for your system from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
+Download the latest release binary for your system from the [Latest Release](https://github.com/azolfagharj/gajin/releases/latest) page.
 
 **Available binaries:**
-- `easygh-darwin-amd64` - macOS (Intel)
-- `easygh-darwin-arm64` - macOS (Apple Silicon)
-- `easygh-linux-amd64` - Linux (64-bit)
-- `easygh-linux-arm64` - Linux (ARM64)
-- `easygh-windows-amd64.exe` - Windows (64-bit)
+- `gajin-darwin-amd64` - macOS (Intel)
+- `gajin-darwin-arm64` - macOS (Apple Silicon)
+- `gajin-linux-amd64` - Linux (64-bit)
+- `gajin-linux-arm64` - Linux (ARM64)
+- `gajin-windows-amd64.exe` - Windows (64-bit)
 
 **Quick setup:**
 
 1. Download the binary for your system:
    ```bash
    # Linux (amd64)
-   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-linux-amd64
-   chmod +x easygh-linux-amd64
-   mv easygh-linux-amd64 easygh
+   wget https://github.com/azolfagharj/gajin/releases/latest/download/gajin-linux-amd64
+   chmod +x gajin-linux-amd64
+   mv gajin-linux-amd64 gajin
 
    # Linux (ARM64)
-   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-linux-arm64
-   chmod +x easygh-linux-arm64
-   mv easygh-linux-arm64 easygh
+   wget https://github.com/azolfagharj/gajin/releases/latest/download/gajin-linux-arm64
+   chmod +x gajin-linux-arm64
+   mv gajin-linux-arm64 gajin
 
    # macOS (Apple Silicon)
-   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-darwin-arm64
-   chmod +x easygh-darwin-arm64
-   mv easygh-darwin-arm64 easygh
+   wget https://github.com/azolfagharj/gajin/releases/latest/download/gajin-darwin-arm64
+   chmod +x gajin-darwin-arm64
+   mv gajin-darwin-arm64 gajin
 
    # macOS (Intel)
-   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-darwin-amd64
-   chmod +x easygh-darwin-amd64
-   mv easygh-darwin-amd64 easygh
+   wget https://github.com/azolfagharj/gajin/releases/latest/download/gajin-darwin-amd64
+   chmod +x gajin-darwin-amd64
+   mv gajin-darwin-amd64 gajin
 
    # Windows (amd64)
-   # Download: https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/easygh-windows-amd64.exe
-   # Rename it to easygh.exe
+   # Download: https://github.com/azolfagharj/gajin/releases/latest/download/gajin-windows-amd64.exe
+   # Rename it to gajin.exe
    ```
 
 2. Download or create a configuration file:
 
    **Option A: Download compact version** (recommended for quick start):
    ```bash
-   wget https://github.com/azolfagharj/easy_gh_secret/releases/latest/download/config.compact.yaml
+   wget https://github.com/azolfagharj/gajin/releases/latest/download/config.compact.yaml
    mv config.compact.yaml config.yaml
    ```
 
@@ -115,7 +117,7 @@ Download the latest release binary for your system from the [Latest Release](htt
        DEPLOYMENT_REGION: "us-east-1"
    ```
 
-   **For complete example with detailed comments**, see [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
+   **For complete example with detailed comments**, see [examples/config.yaml](https://github.com/azolfagharj/gajin/blob/main/examples/config.yaml) in the repository.
 
 3. Set your GitHub token:
 
@@ -133,10 +135,10 @@ Download the latest release binary for your system from the [Latest Release](htt
 
 ```bash
 # Linux/macOS
-./easygh --config config.yaml
+./gajin --config config.yaml
 
 # Windows
-easygh.exe --config config.yaml
+gajin.exe --config config.yaml
 ```
 
 ### Build from Source
@@ -149,17 +151,17 @@ If you prefer to build from source or need a custom build:
 **Build steps:**
 
 ```bash
-git clone https://github.com/azolfagharj/easy_gh_secret.git
-cd easy_gh_secret
+git clone https://github.com/azolfagharj/gajin.git
+cd gajin
 make build
 ```
 
-The binary will be created in `bin/easygh`.
+The binary will be created in `bin/gajin`.
 
 **Alternative build command:**
 
 ```bash
-go build -o bin/easygh ./cmd/easygh
+go build -o bin/gajin ./cmd/gajin
 ```
 
 ## Usage
@@ -167,7 +169,7 @@ go build -o bin/easygh ./cmd/easygh
 ### Basic Usage
 
 ```bash
-easygh --config config.yaml
+gajin --config config.yaml
 ```
 
 ### Dry Run Mode
@@ -175,7 +177,7 @@ easygh --config config.yaml
 Preview what would be changed without making actual changes:
 
 ```bash
-easygh --config config.yaml --dry-run
+gajin --config config.yaml --dry-run
 ```
 
 ### Override Configuration
@@ -183,7 +185,7 @@ easygh --config config.yaml --dry-run
 Override any configuration value from the command line:
 
 ```bash
-easygh --config config.yaml --token my-token --owner my-org --repo repo1,repo2
+gajin --config config.yaml --token my-token --owner my-org --repo repo1,repo2
 ```
 
 ### Continue on Error
@@ -191,7 +193,7 @@ easygh --config config.yaml --token my-token --owner my-org --repo repo1,repo2
 Continue processing other repositories even if one fails:
 
 ```bash
-easygh --config config.yaml --continue-on-error
+gajin --config config.yaml --continue-on-error
 ```
 
 ### Verbose Logging
@@ -199,21 +201,21 @@ easygh --config config.yaml --continue-on-error
 Enable verbose logging for debugging:
 
 ```bash
-easygh --config config.yaml --verbose
+gajin --config config.yaml --verbose
 ```
 
 ### Show Version
 
 ```bash
-easygh --version
+gajin --version
 ```
 
 ## Configuration
 
 **Configuration Examples:**
 
-- **Compact version** (recommended for quick start): Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
-- **Complete version** (with detailed comments): See [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
+- **Compact version** (recommended for quick start): Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/gajin/releases/latest) page.
+- **Complete version** (with detailed comments): See [examples/config.yaml](https://github.com/azolfagharj/gajin/blob/main/examples/config.yaml) in the repository.
 
 ### Configuration File Structure
 
@@ -267,8 +269,8 @@ environment_variables:
 - For organization-level operations: `admin:org` scope
 
 For detailed permission setup instructions:
-- **Compact version**: Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
-- **Complete version**: See [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
+- **Compact version**: Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/gajin/releases/latest) page.
+- **Complete version**: See [examples/config.yaml](https://github.com/azolfagharj/gajin/blob/main/examples/config.yaml) in the repository.
 
 ### CLI Flags
 
@@ -285,8 +287,8 @@ For detailed permission setup instructions:
 
 **Configuration Examples:**
 
-- **Compact version** (recommended for quick start): Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/easy_gh_secret/releases/latest) page.
-- **Complete version** (with detailed comments): See [examples/config.yaml](https://github.com/azolfagharj/gh_easy_secret/blob/main/examples/config.yaml) in the repository.
+- **Compact version** (recommended for quick start): Download `config.compact.yaml` from the [Latest Release](https://github.com/azolfagharj/gajin/releases/latest) page.
+- **Complete version** (with detailed comments): See [examples/config.yaml](https://github.com/azolfagharj/gajin/blob/main/examples/config.yaml) in the repository.
 
 See the [examples/](examples/) directory for more examples.
 
