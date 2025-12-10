@@ -131,10 +131,30 @@ jobs:
       - name: Test binary
         shell: bash
         run: |
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            ./release-binaries/easygh-${{ matrix.goos }}-${{ matrix.goarch }}.exe --version
+          BINARY_NAME="easygh-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
+          BINARY_PATH="./release-binaries/${BINARY_NAME}"
+
+          # Check if binary exists
+          if [ ! -f "$BINARY_PATH" ]; then
+            echo "Error: Binary not found at $BINARY_PATH"
+            exit 1
+          fi
+
+          # For linux/amd64, we can actually run it
+          if [ "${{ matrix.goos }}" = "linux" ] && [ "${{ matrix.goarch }}" = "amd64" ]; then
+            echo "Running binary test for linux/amd64..."
+            $BINARY_PATH --version
           else
-            ./release-binaries/easygh-${{ matrix.goos }}-${{ matrix.goarch }} --version
+            # For other platforms, verify file type and size
+            echo "Verifying binary for ${{ matrix.goos }}/${{ matrix.goarch }}..."
+            file "$BINARY_PATH"
+            ls -lh "$BINARY_PATH"
+            # Check that file is not empty
+            if [ ! -s "$BINARY_PATH" ]; then
+              echo "Error: Binary is empty"
+              exit 1
+            fi
+            echo "Binary verification passed for ${{ matrix.goos }}/${{ matrix.goarch }}"
           fi
 
       - name: List binaries
