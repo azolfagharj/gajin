@@ -106,6 +106,18 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
+      - name: Verify project structure
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Listing files:"
+          ls -la
+          echo "Checking cmd/easygh:"
+          ls -la cmd/easygh/ || echo "cmd/easygh not found"
+          echo "Checking go.mod:"
+          cat go.mod | head -5
+          echo "Verifying package can be found:"
+          go list ./cmd/easygh || echo "Package not found"
+
       - name: Build binary
         env:
           GOOS: ${{ matrix.goos }}
