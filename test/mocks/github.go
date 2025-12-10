@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/yourusername/easy_gh_secret/internal/github"
+	"github.com/azolfagharj/gajin/internal/github"
 )
 
 // MockClient is a mock implementation of github.Client for testing.
