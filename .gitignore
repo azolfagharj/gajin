@@ -33,6 +33,7 @@ easy-gh-secret
 coverage.html
 coverage.out
 
+
 # IDE files
 .vscode/
 .idea/
