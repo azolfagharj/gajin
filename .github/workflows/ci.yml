@@ -60,7 +60,6 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
-          args: --version
           only-new-issues: false
 
       - name: Run lint
