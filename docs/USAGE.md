@@ -166,6 +166,14 @@ export GH_TOKEN_WITH_ACTIONS_WRITE=your-token
 
 **Solution**: Ensure your token has `actions:write` permission and Actions is enabled for the repository.
 
+#### "validation failed due to an improperly encrypted secret"
+
+**Possible causes**:
+- Encryption format mismatch (using incorrect nonce derivation)
+- Invalid or corrupted public key
+
+**Solution**: This is typically a bug in the encryption implementation. Make sure you're using the latest version of easygh which correctly implements LibSodium sealed box encryption.
+
 ### Debugging
 
 Use verbose mode to see detailed error messages:

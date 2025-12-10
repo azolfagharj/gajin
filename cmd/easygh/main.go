@@ -21,11 +21,11 @@ var (
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:   "easygh",
-		Short: "Manage GitHub Actions secrets across multiple repositories",
-		Long: `easygh is a CLI tool to manage GitHub Actions secrets
-across multiple repositories using a YAML configuration file.`,
-		RunE: run,
+		Use:          "easygh",
+		Short:        "Manage GitHub Actions secrets across multiple repositories",
+		Long:         `easygh is a CLI tool to manage GitHub Actions secrets across multiple repositories using a YAML configuration file.`,
+		RunE:         run,
+		SilenceUsage: true,
 	}
 
 	flags := &cli.Flags{}
@@ -96,8 +96,11 @@ func execute(ctx context.Context, log *logger.Logger, ghClient github.Client, cf
 		log.Info("DRY RUN MODE - No changes will be made")
 	}
 
+	// Create a cancellable context
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	var wg sync.WaitGroup
-	errorChan := make(chan error, len(cfg.GitHub.Repos))
 	var errorMutex sync.Mutex
 	var errors []error
 
@@ -106,6 +109,11 @@ func execute(ctx context.Context, log *logger.Logger, ghClient github.Client, cf
 		wg.Add(1)
 		go func(repoName string) {
 			defer wg.Done()
+
+			// Check if context is cancelled
+			if ctx.Err() != nil {
+				return
+			}
 
 			log.Info("Processing repository", "repo", repoName)
 
@@ -117,9 +125,8 @@ func execute(ctx context.Context, log *logger.Logger, ghClient github.Client, cf
 				errorMutex.Unlock()
 
 				if !flags.ContinueOnError {
-					for _, err := range repoErrors {
-						errorChan <- err
-					}
+					// Cancel context to stop other goroutines
+					cancel()
 				}
 			}
 		}(repo)
@@ -127,12 +134,6 @@ func execute(ctx context.Context, log *logger.Logger, ghClient github.Client, cf
 
 	// Wait for all goroutines to complete
 	wg.Wait()
-	close(errorChan)
-
-	// Collect errors
-	for err := range errorChan {
-		errors = append(errors, err)
-	}
 
 	// Report results
 	if len(errors) > 0 {
@@ -151,6 +152,11 @@ func processRepository(ctx context.Context, log *logger.Logger, ghClient github.
 	var errors []error
 
 	for secretName, secretValue := range secrets {
+		// Check if context is cancelled
+		if ctx.Err() != nil {
+			return errors
+		}
+
 		if dryRun {
 			// Try to get existing secret to show diff
 			existingSecret, err := ghClient.GetSecret(ctx, owner, repo, secretName)

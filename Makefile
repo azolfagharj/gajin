@@ -1,4 +1,4 @@
-.PHONY: build test lint clean release help
+.PHONY: build test lint clean release help verify
 
 # Variables
 BINARY_NAME=easygh
@@ -54,6 +54,13 @@ install: build ## Install the binary to GOPATH/bin
 
 run: build ## Build and run the binary
 	@$(BINARY_PATH)
+
+verify: ## Verify dependencies and run tests
+	@echo "Verifying project..."
+	@go mod verify
+	@go vet ./...
+	@go test -race ./...
+	@echo "Verification passed!"
 
 .DEFAULT_GOAL := help
 

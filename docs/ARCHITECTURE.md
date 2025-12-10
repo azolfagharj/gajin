@@ -118,10 +118,21 @@ Repositories are processed concurrently using goroutines:
 
 ### Secret Encryption
 
-Secrets are encrypted using GitHub's public key encryption:
-1. Repository's public key is retrieved
-2. Secret is encrypted using NaCl box encryption
-3. Encrypted secret is sent to GitHub API
+Secrets are encrypted using GitHub's public key encryption following the LibSodium sealed box format (`crypto_box_seal`):
+
+1. Repository's public key is retrieved from GitHub API
+2. An ephemeral key pair is generated for each encryption
+3. A nonce is derived using **BLAKE2b with 24-byte output** (NOT truncated from 64 bytes):
+   ```
+   nonce = BLAKE2b(ephemeral_pk || recipient_pk, digest_size=24)
+   ```
+4. Secret is encrypted using NaCl box encryption with the derived nonce
+5. Encrypted data format: `[ephemeral public key (32 bytes)][encrypted ciphertext + MAC (16 bytes)]`
+6. The encrypted value is base64 encoded and sent to GitHub API along with the key ID
+
+**Important:** The nonce derivation uses `BLAKE2b` with `digest_size=24`, which is different from computing `BLAKE2b-512` and taking the first 24 bytes. This distinction is critical for compatibility with LibSodium's `crypto_box_seal`.
+
+This format ensures that each encryption produces different ciphertext even for the same plaintext, providing forward secrecy.
 
 ### Token Handling
 

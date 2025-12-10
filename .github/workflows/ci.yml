@@ -230,7 +230,7 @@ jobs:
 
       - name: Send Telegram notification
         if: always()
-        run: ./az_ghtelegram
+        run: .github/scripts/az_ghtelegram
         env:
           TELEGRAM_API_URL: ${{ vars.TELEGRAM_API_URL }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
