@@ -1,6 +1,6 @@
-# GajIn
+# GajIn <a href="https://donate.azolfagharj.ir/"><img src="https://img.shields.io/badge/Donate-Support%20Development-orange?style=for-the-badge" alt="Donate"></a>
 
-**GitHub Actions Secrets & Variables Injector**
+**GitHub Actions Secrets & Variables Injector** 
 
 A CLI tool to manage GitHub Actions secrets and variables across multiple repositories using a YAML configuration file.
 
@@ -306,6 +306,17 @@ See the [examples/](examples/) directory for more examples.
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+## Support this Project
+
+
+
+ 🤝 **Enjoying this free project?** <a href="https://donate.azolfagharj.ir/">Consider supporting</a> its development
+
+<a href="https://donate.azolfagharj.ir/"><img src="https://img.shields.io/badge/Donate-Support%20Development-orange?style=for-the-badge" alt="Donate"></a>
+
+---
 
 ## Contributing
 
